@@ -10,8 +10,8 @@ export const defaultSettings = { age: 18, temperature: 0.75, darkTheme: false };
 
 // create contexts for the settings variable and the updateSettings function
 const SettingsContext = createContext<Settings>(defaultSettings);
-const UpdateSettingsContext = createContext<(v: Settings) => void>(
-  (v: Settings) => {} // dummy function to allow type declaration
+const UpdateSettingsContext = createContext<(v: Partial<Settings>) => void>(
+  (v: Partial<Settings>) => {} // dummy function to allow type declaration
 );
 
 // export custom hooks to use settings and updateSettings
