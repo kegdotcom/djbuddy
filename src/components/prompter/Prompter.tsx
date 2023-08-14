@@ -1,5 +1,5 @@
-import React, { useState, FormEvent, useContext } from "react";
-import useSettings, { Settings } from "../../context/SettingsContext";
+import React, { useState, FormEvent } from "react";
+import useSettings from "../../context/SettingsContext";
 
 export default function Prompter() {
   interface FormData {
@@ -14,6 +14,8 @@ export default function Prompter() {
     type: "song",
     context: "",
   });
+
+  const [displayText, setDisplayText] = useState<string>("");
 
   function handleInputUpdate(propName: string) {
     return (ev: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
@@ -38,64 +40,76 @@ export default function Prompter() {
         messages: [
           {
             role: "user",
-            content: `Find me ${formData.n} songs on Spotify that are similar to the ${formData.type} "${formData.context}" and a ${settings.age} year old would especially enjoy`,
+            content: `Find me ${formData.n} songs on Spotify that are similar to the ${formData.type} "${formData.context}" and a ${settings.age} year old would especially enjoy. list songs in the following format, seperated by commas, and no other words or numbering: <SONG>::<ARTIST>`,
           },
         ],
         temperature: settings.temperature,
       }),
     })
       .then((response) => response.json())
-      .then((data) => window.alert(JSON.stringify(data)));
+      .then((data) => {
+        const message = data.choices[0].message.content;
+        const promptTokenPrice = data.usage.prompt_tokens * 0.0000015;
+        const completionTokenPrice = data.usage.completion_tokens * 0.000002;
+        const totalCost = promptTokenPrice + completionTokenPrice;
+
+        setDisplayText(
+          `${message}\n\nPrompt Price: ${promptTokenPrice}\nCompletion Price: ${completionTokenPrice}\nTotal Price: ${totalCost}`
+        );
+      });
 
     setFormData({ n: "1", type: "song", context: "" });
   }
 
   return (
-    <div className="prompter" key="prompter">
-      <form
-        className="prompter prompter-form"
-        key="prompter-form"
-        onSubmit={onSubmit}
-      >
-        Find me
-        <input
-          className="prompter prompter-input"
-          key="prompter-input-number"
-          type="number"
-          defaultValue={1}
-          min={1}
-          max={50}
-          onChange={handleInputUpdate("n")}
-        />
-        songs like this
-        <select
-          className="prompter prompter-input"
-          key="prompter-input-type"
-          form="prompter-form"
-          name="Prompt Type"
-          onChange={handleInputUpdate("type")}
+    <>
+      <div className="prompter" key="prompter">
+        <form
+          className="prompter prompter-form"
+          key="prompter-form"
+          onSubmit={onSubmit}
         >
-          <option value="song">Song</option>
-          <option value="artist">Artist</option>
-          <option value="album">Album</option>
-          <option value="genre">Genre</option>
-          <option value="emotion">Emotion</option>
-        </select>
-        :
-        <input
-          className="prompter prompter-input"
-          key="prompter-input-context"
-          type="text"
-          placeholder="Context"
-          onChange={handleInputUpdate("context")}
-        />
-        <input
-          className="prompter prompter-submit"
-          key="prompter-submit"
-          type="submit"
-          value="Submit"
-        />
-      </form>
-    </div>
+          Find me
+          <input
+            className="prompter prompter-input"
+            key="prompter-input-number"
+            type="number"
+            defaultValue={1}
+            min={1}
+            max={50}
+            onChange={handleInputUpdate("n")}
+          />
+          songs like this
+          <select
+            className="prompter prompter-input"
+            key="prompter-input-type"
+            form="prompter-form"
+            name="Prompt Type"
+            onChange={handleInputUpdate("type")}
+          >
+            <option value="song">Song</option>
+            <option value="artist">Artist</option>
+            <option value="album">Album</option>
+            <option value="genre">Genre</option>
+            <option value="emotion">Emotion</option>
+          </select>
+          :
+          <input
+            className="prompter prompter-input"
+            key="prompter-input-context"
+            type="text"
+            placeholder="Context"
+            onChange={handleInputUpdate("context")}
+          />
+          <input
+            className="prompter prompter-submit"
+            key="prompter-submit"
+            type="submit"
+            value="Submit"
+          />
+        </form>
+      </div>
+      {displayText}
+    </>
   );
 }
