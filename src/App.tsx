@@ -1,6 +1,7 @@
 import React from "react";
 import "./App.css";
 import { Routes, Route } from "react-router-dom";
+import { SettingsProvider } from "./context/SettingsContext";
 
 import Navbar from "./components/navbar/Navbar";
 import Home from "./pages/Home";
@@ -12,14 +13,16 @@ import Settings from "./pages/Settings";
 function App() {
   return (
     <>
-      <Navbar />
-      <Routes>
-        <Route path="/" element={<Home />} />
-        <Route path="/search" element={<Search />} />
-        <Route path="/wrapped" element={<Wrapped />} />
-        <Route path="/about" element={<About />} />
-        <Route path="/settings" element={<Settings />} />
-      </Routes>
+      <SettingsProvider>
+        <Navbar />
+        <Routes>
+          <Route path="/" element={<Home />} />
+          <Route path="/search" element={<Search />} />
+          <Route path="/wrapped" element={<Wrapped />} />
+          <Route path="/about" element={<About />} />
+          <Route path="/settings" element={<Settings />} />
+        </Routes>
+      </SettingsProvider>
     </>
   );
 }

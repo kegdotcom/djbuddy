@@ -1,4 +1,5 @@
-import React, { useState, FormEvent } from "react";
+import React, { useState, FormEvent, useContext } from "react";
+import useSettings, { Settings } from "../../context/SettingsContext";
 
 export default function Prompter() {
   interface FormData {
@@ -7,6 +8,7 @@ export default function Prompter() {
     context: string;
   }
 
+  const settings = useSettings();
   const [formData, setFormData] = useState<FormData>({
     n: "1",
     type: "song",
@@ -36,10 +38,10 @@ export default function Prompter() {
         messages: [
           {
             role: "user",
-            content: `Find me ${formData.n} songs on Spotify that are similar to this ${formData.type}: ${formData.context}`,
+            content: `Find me ${formData.n} songs on Spotify that are similar to the ${formData.type} "${formData.context}" and a ${settings.age} year old would especially enjoy`,
           },
         ],
-        temperature: 0.75,
+        temperature: settings.temperature,
       }),
     })
       .then((response) => response.json())
